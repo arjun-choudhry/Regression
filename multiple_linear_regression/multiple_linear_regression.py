@@ -36,3 +36,6 @@ X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.2,random_sta
 from sklearn.linear_model import LinearRegression
 linearRegressor = LinearRegression()
 linearRegressor = linearRegressor.fit(X_train,y_train)
+
+# Predicting the Test seet result
+y_pred = linearRegressor.predict(X_test)
