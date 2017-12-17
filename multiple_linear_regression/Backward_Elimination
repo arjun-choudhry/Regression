@@ -1,0 +1,61 @@
+# Data Preprocessing
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+
+dataset = pd.read_csv('50_Startups.csv')
+
+X = dataset.iloc[:,:-1].values
+y = dataset.iloc[:,4].values
+
+from sklearn.preprocessing import LabelEncoder, OneHotEncoder
+labelEncoderState = LabelEncoder()
+X[:,3] = labelEncoderState.fit_transform(X[:,3])
+
+oneHotEncoderState = OneHotEncoder(categorical_features=[3])
+X = oneHotEncoderState.fit_transform(X).toarray()
+
+# Avoiding the Dummy Variable Trap - Libraries take care of this
+X = X[:,1:]
+
+# Building the optimal model using backward elimination
+import statsmodels.formula.api as sm
+X = np.append(arr = np.ones(shape = (50,1)).astype(int), values = X, axis = 1)
+
+# Starting backward elimination
+X_opt = X
+regressor_ols = sm.OLS(endog= y, exog= X_opt).fit()
+regressor_ols.summary()
+
+# Now, since there is atleast 1 property with P>0.05, we will take the highest value and eliminate it. ie we will eliminate x(2) and we will create the model without x(2) and remodel everything
+X_opt = X[:,[0,1,3,4,5]]
+regressor_ols = sm.OLS(endog= y, exog= X_opt).fit()
+regressor_ols.summary()
+
+# Still, there are 2 variables which have P>0.05, so we will eliminate it(x(3)) and remodel everything
+X_opt = X_opt[:,[0,2,3,4]]
+regressor_ols = sm.OLS(endog= y, exog= X_opt).fit()
+regressor_ols.summary()
+
+# Still, there are 3 variables which have P>0.05, so we will eliminate it(x(1)) and remodel everything
+X_opt = X_opt[:,[0,1,3]]
+regressor_ols = sm.OLS(endog= y, exog= X_opt).fit()
+regressor_ols.summary()
+
+# Still, there are 2 variables which have P>0.05, so we will eliminate it(x(0)) and remodel everything
+X_opt = X_opt[:,[0,1]]
+regressor_ols = sm.OLS(endog= y, exog= X_opt).fit()
+regressor_ols.summary()
+
+# Now, we have no variables having p>0.05. Hence, we are done building the model.
+
+# Now, we can apply the multiple linear regressor model to X_opt, ie this conatins only the R&D net spend data. Now, we will build the updated X_test, x_train etc
+X_opt_train, X_opt_test,y_opt_train,y_opt_test = train_test_split(X_opt,y,test_size=0.2,random_state=0)
+
+from sklearn.linear_model import LinearRegression
+linearRegressor = LinearRegression()
+linearRegressor = linearRegressor.fit(X_opt_train,y_opt_train)
+
+# Predicting the Test seet result
+y_pred = linearRegressor.predict(X_opt_test)
+
