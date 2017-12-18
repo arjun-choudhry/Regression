@@ -22,3 +22,13 @@ svrRegressor.fit(X_scale,y_scale)
 
 y_pred = svrRegressor.predict(X_scale)
 y_pred_actual = sc_y.inverse_transform(y_pred)
+
+# Plotting the points for visualization of Regressor result(for higher resolution)
+X_grid = np.arange(min(X_scale), max(X_scale), step = 0.1)
+X_grid = X_grid.reshape(len(X_grid),1)
+plt.scatter(X_scale,y_scale,color="red")
+plt.plot(X_grid,svrRegressor.predict(X_grid),color="blue")
+plt.title("SVR Regression Model")
+plt.xlabel("Position Level")
+plt.ylabel("Salary")
+plt.show()
